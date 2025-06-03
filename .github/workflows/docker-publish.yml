@@ -1,9 +1,9 @@
-name: Build & Push Docker Image
+name: Build & Publish Docker Image
 
 on:
   push:
     branches:
-      - main
+      - main  # Runs on pushes to the main branch
 
 jobs:
   build-and-push:
@@ -15,7 +15,8 @@ jobs:
 
       - name: Set Up SSH Authentication
         run: |
-          echo "${{ secrets.DOCKER_DEPLOY_KEY }}" > ~/.ssh/id_rsa
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DOCKER_DEPLOY_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
 
@@ -32,4 +33,8 @@ jobs:
       - name: Push Docker Image to Docker Hub
         run: |
           docker push your-username/energy-optimizer:latest
+
+      - name: Clean Up Disk Space
+        run: |
+          docker system prune -a
 
